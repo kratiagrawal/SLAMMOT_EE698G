@@ -1,5 +1,4 @@
 #include <iostream>
-#include <Eigen/Eigen>
 #include <Eigen/Dense>
 #include <math.h>
 using namespace Eigen;
@@ -7,28 +6,32 @@ using namespace std;
 
 void update(VectorXf* u, MatrixXf* E)
 {
-	int v, w,t;
+	float v, w,t;
 	v = 0.1;
 	w = 0.5;
 	t = 0.05;
 	int N;
 	N = u->size();
-	MatrixXd Fx(3,N);
-	MatrixXf R(3,3);
-
-	VectorXf PM(3);
+	MatrixXf Fx(3,N);
+	Matrix3f R(3,3);
+	Vector3f PM(3);
 	MatrixXf G(N,N);
-	MatrixXf g(3,3);
+	Matrix3f g(3,3);
+	VectorXf u_(N);
+	MatrixXf E_(N,N);
+
+	u_ = *u;
+	E_= *E;
 
 	R << Matrix3f::Identity(3,3);
 
 	Fx << MatrixXf::Identity(3,3), MatrixXf::Zero(3,N-3);
 
-	PM << 	-(v/w)*sin(u(2)) + (v/w)*sin(u(2) + w*t),
-			 (v/w)*sin(u(2)) - (v/w)*sin(u(2) + w*t),
+	PM << 	-(v/w)*sin(u_(2)) + (v/w)*sin(u_(2) + w*t),
+			 (v/w)*sin(u_(2)) - (v/w)*sin(u_(2) + w*t),
 			 				w*t;
-	g << 0, 0, (v/w)*cos(u(2)) - (v/w)*cos(u(2) + w*t),
-		 0, 0, (v/w)*sin(u(2)) - (v/w)*sin(u(2) + w*t),
+	g << 0, 0, (v/w)*cos(u_(2)) - (v/w)*cos(u_(2) + w*t),
+		 0, 0, (v/w)*sin(u_(2)) - (v/w)*sin(u_(2) + w*t),
 		 0,0,0;
 
 	// Prediction Step
@@ -36,7 +39,7 @@ void update(VectorXf* u, MatrixXf* E)
 	G =  MatrixXf::Identity(N,N) + Fx.transpose()*g*Fx;
 	*E = G*(*E)*G.transpose() + Fx.transpose()*R*Fx;
 
-}
+} 
 
 void unmatched (VectorXf* u, MatrixXf* E, VectorXf* u_new, MatrixXf* E_new, float xk, float yk, float zk) {
 	float r,phi;
